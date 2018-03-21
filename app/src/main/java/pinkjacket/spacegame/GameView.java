@@ -8,6 +8,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.util.ArrayList;
+
 public class GameView extends SurfaceView implements Runnable {
 
     volatile boolean playing;
@@ -17,6 +19,7 @@ public class GameView extends SurfaceView implements Runnable {
     private Paint paint;
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
+    private ArrayList<Star> stars = new ArrayList<Star>();
 
     public GameView(Context context, int screenX, int screenY) {
         super(context);
@@ -24,6 +27,13 @@ public class GameView extends SurfaceView implements Runnable {
         player = new Player(context, screenX, screenY);
         surfaceHolder = getHolder();
         paint = new Paint();
+
+        //stars
+        int starNum = 100;
+        for(int i = 0; i < starNum; i++){
+            Star s = new Star(screenX, screenY);
+            stars.add(s);
+        }
     }
 
     @Override
@@ -38,12 +48,21 @@ public class GameView extends SurfaceView implements Runnable {
 
     private void update() {
         player.update();
+        for(Star s : stars){
+            s.update(player.getSpeed());
+        }
     }
 
     private void draw() {
         if(surfaceHolder.getSurface().isValid()){
             canvas = surfaceHolder.lockCanvas();
             canvas.drawColor(Color.BLACK);
+
+            paint.setColor(Color.WHITE);
+            for(Star s : stars){
+                paint.setStrokeWidth(s.getStarWidth());
+                canvas.drawPoint(s.getX(), s.getY(), paint);
+            }
             canvas.drawBitmap(
                     player.getBitmap(),
                     player.getX(),
